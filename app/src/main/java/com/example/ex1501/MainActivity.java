@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,14 +15,13 @@ import java.util.Calendar;
 public class MainActivity extends AppCompatActivity {
     private AlarmManager alarmMgr;
     private PendingIntent hourlyAlarmIntent;
-    private int HOURLY_ALARM_REQUEST_CODE;
+    private int HOURLY_ALARM_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        HOURLY_ALARM_REQUEST_CODE = 0;
         setHourlyAlarm();
     }
 
@@ -35,6 +35,16 @@ public class MainActivity extends AppCompatActivity {
         alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP,
                 calNow.getTimeInMillis() + 60 * 60 * 1000,
                 AlarmManager.INTERVAL_HOUR, hourlyAlarmIntent);
+    }
+
+    private void openTimePickerDialog(boolean is24r) {
+        Calendar calendar = Calendar.getInstance();
+
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, onTimeSetListener,
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE), is24r);
+        timePickerDialog.setTitle("Choose time");
+        timePickerDialog.show();
     }
 
     /**
