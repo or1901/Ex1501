@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.util.Calendar;
 
@@ -16,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     private AlarmManager alarmMgr;
     private PendingIntent hourlyAlarmIntent;
     private int HOURLY_ALARM_REQUEST_CODE = 1;
+    private final Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,33 @@ public class MainActivity extends AppCompatActivity {
                 calendar.get(Calendar.MINUTE), is24r);
         timePickerDialog.setTitle("Choose time");
         timePickerDialog.show();
+    }
+
+    TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+
+            Calendar calNow = Calendar.getInstance();
+            Calendar calSet = (Calendar) calNow.clone();
+
+            calSet.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            calSet.set(Calendar.MINUTE, minute);
+            calSet.set(Calendar.SECOND, 0);
+            calSet.set(Calendar.MILLISECOND, 0);
+
+            if (calSet.compareTo(calNow) <= 0) {
+                Toast.makeText(context, "Can't set alarm to the past or the present!",
+                        Toast.LENGTH_LONG).show();
+            }
+            else {
+
+            }
+
+        }
+    };
+
+    public void chooseAlarmTime(View view) {
+        openTimePickerDialog(true);
     }
 
     /**

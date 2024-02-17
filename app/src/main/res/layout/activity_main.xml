@@ -60,6 +60,7 @@
             android:layout_height="match_parent"
             android:layout_weight="2"
             android:backgroundTint="@color/cardview_dark_background"
+            android:onClick="chooseAlarmTime"
             android:text="Set alarm"
             android:textSize="24sp" />
 
