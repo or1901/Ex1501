@@ -90,6 +90,7 @@
             android:layout_height="match_parent"
             android:layout_weight="2"
             android:backgroundTint="@color/cardview_dark_background"
+            android:onClick="exitApp"
             android:text="Exit"
             android:textSize="24sp" />
 
