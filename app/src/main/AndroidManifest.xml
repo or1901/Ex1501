@@ -17,7 +17,8 @@
         <receiver
             android:name=".ExactAlarmReceiver"
             android:enabled="true"
-            android:exported="true"></receiver>
+            android:exported="true">
+        </receiver>
         <receiver
             android:name=".HourlyAlarmReceiver"
             android:enabled="true"

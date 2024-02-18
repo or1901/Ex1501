@@ -18,17 +18,26 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
+/**
+ * The main activity:
+ * allows to configure a daily alarm(only one exists at a time). If not configured,
+ * the default alarm is approximately once a hour.
+ * @author Ori Roitzaid <or1901 @ bs.amalnet.k12.il>
+ * @version	1
+ * @since 18/2/2024
+ */
 public class MainActivity extends AppCompatActivity {
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private final int HOURLY_ALARM_REQUEST_CODE = 1;
     private int EXACT_ALARM_REQUEST_CODE;
-    private Context context = this;
+    private final Context context = this;
     private TextView tvAlarmTime;
     private AlertDialog.Builder adb;
     private AlertDialog ad;
     private final static MainActivity instance = new MainActivity();
     private Calendar currentAlarmTime;
+    boolean currentAlarmType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
                 SystemClock.elapsedRealtime() + 60 * 60 * 1000,
                 AlarmManager.INTERVAL_HOUR, alarmIntent);
+
+        currentAlarmType = false;
     }
 
     private void openTimePickerDialog() {
@@ -74,12 +85,9 @@ public class MainActivity extends AppCompatActivity {
             calSet.set(Calendar.MILLISECOND, 0);
 
             if (calSet.compareTo(calNow) <= 0) {
-                Toast.makeText(context, "Can't set alarm to the past or the present!",
-                        Toast.LENGTH_LONG).show();
+                calSet.add(Calendar.DATE, 1);
             }
-            else {
-                setExactAlarm(calSet);
-            }
+            setExactAlarm(calSet);
         }
     };
 
@@ -88,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setExactAlarm(Calendar calSet) {
+        cancelAlarm(currentAlarmType);
+
         Intent intent = new Intent(this, ExactAlarmReceiver.class);
         intent.putExtra("alarmNum", EXACT_ALARM_REQUEST_CODE);
 
@@ -101,6 +111,9 @@ public class MainActivity extends AppCompatActivity {
         tvAlarmTime.setText("Alarm is set to: " +  calSet.getTime());
         EXACT_ALARM_REQUEST_CODE++;
         currentAlarmTime = calSet;
+
+        currentAlarmType = true;
+
     }
 
     public static MainActivity getInstance() {
@@ -139,6 +152,26 @@ public class MainActivity extends AppCompatActivity {
 
         ad = adb.create();
         ad.show();
+    }
+
+    public void cancelAlarm(boolean alarmType) {
+        Intent intent;
+
+        if(!alarmType) {
+            intent = new Intent(this, HourlyAlarmReceiver.class);
+            alarmIntent = PendingIntent.getBroadcast(this,
+                    HOURLY_ALARM_REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
+        }
+        else {
+            intent = new Intent(this, ExactAlarmReceiver.class);
+            alarmIntent = PendingIntent.getBroadcast(this,
+                    EXACT_ALARM_REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
+        }
+
+        alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+        alarmMgr.cancel(alarmIntent);
+
+        EXACT_ALARM_REQUEST_CODE = 0;
     }
 
     /**
