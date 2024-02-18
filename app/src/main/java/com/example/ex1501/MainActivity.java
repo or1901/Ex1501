@@ -49,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
         setHourlyAlarm();
     }
 
+    /**
+     * This function sets an approximate alarm for once a hour.
+     */
     public void setHourlyAlarm() {
         Intent intent = new Intent(this, HourlyAlarmReceiver.class);
         alarmIntent = PendingIntent.getBroadcast(this,
@@ -62,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
         currentAlarmType = false;
     }
 
+    /**
+     * This function opens the time picker dialog for the user to choose when to set the exact alarm.
+     */
     private void openTimePickerDialog() {
         Calendar calendar = Calendar.getInstance();
 
@@ -73,9 +79,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     TimePickerDialog.OnTimeSetListener onTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+
+        /**
+         * This function reacts to a time picking in the time picker dialog - it sets an exact alarm
+         * to the picked time.
+         * @param view The time picker object
+         * @param hourOfDay The selected hour of day
+         * @param minute The selected minute of the hour
+         */
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-
             Calendar calNow = Calendar.getInstance();
             Calendar calSet = (Calendar) calNow.clone();
 
@@ -84,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             calSet.set(Calendar.SECOND, 0);
             calSet.set(Calendar.MILLISECOND, 0);
 
+            // If the time is in the past or the present, sets it to the next day
             if (calSet.compareTo(calNow) <= 0) {
                 calSet.add(Calendar.DATE, 1);
             }
@@ -91,12 +105,22 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * This function links the button for setting time with opening the time picker dialog, and
+     * setting the alarm for a specific time.
+     * @param view The button clicked in order to set the exact alarm.
+     */
     public void chooseAlarmTime(View view) {
         openTimePickerDialog();
     }
 
+    /**
+     * This function sets an exact alarm to a given calendar time.
+     * @param calSet The calendar object to set the alarm to its time
+     */
     private void setExactAlarm(Calendar calSet) {
-        cancelAlarm(currentAlarmType);
+        cancelAlarm(currentAlarmType);  // Cancels the existing alarm
+        EXACT_ALARM_REQUEST_CODE = 0;
 
         Intent intent = new Intent(this, ExactAlarmReceiver.class);
         intent.putExtra("alarmNum", EXACT_ALARM_REQUEST_CODE);
@@ -106,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP,
                 calSet.getTimeInMillis(),
-                5 * 60 * 1000, alarmIntent);
+                5 * 60 * 1000, alarmIntent);  // Defines with snooze of 5 minutes
 
         tvAlarmTime.setText("Alarm is set to: " +  calSet.getTime());
         EXACT_ALARM_REQUEST_CODE++;
@@ -116,19 +140,28 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * This function gets the only instance of this activity.
+     * @return The only instance of this activity
+     */
     public static MainActivity getInstance() {
         return instance;
     }
 
-    public void showAlertDialog(int alarmNum) {
+    /**
+     * This function shows the alert dialog when an exact alarm is received.
+     * It has two options - snooze or confirm the alarm.
+     */
+    public void showAlertDialog() {
         adb = new AlertDialog.Builder(this);
         adb.setCancelable(false);
 
-        if(alarmNum == 0) {
+        // Sets the title according to the alarm number
+        if(EXACT_ALARM_REQUEST_CODE == 0) {
             adb.setTitle("Alarm clock");
         }
         else {
-            adb.setTitle("Snooze " + alarmNum);
+            adb.setTitle("Snooze " + EXACT_ALARM_REQUEST_CODE);
         }
 
         adb.setMessage("Do you want confirm the alarm or set 5 minutes snooze?");
@@ -137,8 +170,8 @@ public class MainActivity extends AppCompatActivity {
         adb.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                currentAlarmTime.add(Calendar.DATE, 1);
                 EXACT_ALARM_REQUEST_CODE = 0;
+                currentAlarmTime.add(Calendar.DATE, 1);  // Sets for the next day
                 setExactAlarm(currentAlarmTime);
             }
         });
@@ -147,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
         adb.setNegativeButton("Mute & Snooze", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                EXACT_ALARM_REQUEST_CODE++;
             }
         });
 
@@ -154,6 +188,10 @@ public class MainActivity extends AppCompatActivity {
         ad.show();
     }
 
+    /**
+     * This function cancels an existing alarm, according to its type.
+     * @param alarmType true for exact alarm, false for hourly alarm.
+     */
     public void cancelAlarm(boolean alarmType) {
         Intent intent;
 
@@ -170,8 +208,6 @@ public class MainActivity extends AppCompatActivity {
 
         alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(alarmIntent);
-
-        EXACT_ALARM_REQUEST_CODE = 0;
     }
 
     /**
