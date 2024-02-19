@@ -12,13 +12,12 @@ import android.content.Intent;
  * @since 19/2/2024
  */
 public class ExactAlarmReceiver extends BroadcastReceiver {
-    int alarmNum;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        alarmNum = intent.getIntExtra("alarmNum", -1);
-
-        MainActivity.getInstance().showAlertDialog(alarmNum);
+        Intent newActivityIntent = new Intent(context, TransparentDialogActivity.class);
+        newActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(newActivityIntent);
     }
 
 

@@ -30,11 +30,9 @@ public class MainActivity extends AppCompatActivity {
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private final int HOURLY_ALARM_REQUEST_CODE = 1;
-    private int EXACT_ALARM_REQUEST_CODE;
+    private int EXACT_ALARM_REQUEST_CODE, snoozeCounter;
     private final Context context = this;
     private TextView tvAlarmTime;
-    private AlertDialog.Builder adb;
-    private AlertDialog ad;
     private final static MainActivity instance = new MainActivity();
     private Calendar currentAlarmTime;
     boolean currentAlarmType;
@@ -44,7 +42,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         EXACT_ALARM_REQUEST_CODE = 0;
+        snoozeCounter = 0;
         tvAlarmTime = (TextView) findViewById(R.id.tvAlarmTime);
         setHourlyAlarm();
     }
@@ -118,19 +118,18 @@ public class MainActivity extends AppCompatActivity {
      * This function sets an exact alarm to a given calendar time.
      * @param calSet The calendar object to set the alarm to its time
      */
-    private void setExactAlarm(Calendar calSet) {
+    public void setExactAlarm(Calendar calSet) {
         cancelAlarm(currentAlarmType);  // Cancels the existing alarm
-        EXACT_ALARM_REQUEST_CODE = 0;
+        snoozeCounter = 0;
 
         Intent intent = new Intent(this, ExactAlarmReceiver.class);
-        intent.putExtra("alarmNum", EXACT_ALARM_REQUEST_CODE);
 
         alarmIntent = PendingIntent.getBroadcast(this,
                 EXACT_ALARM_REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
         alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP,
                 calSet.getTimeInMillis(),
-                5 * 60 * 1000, alarmIntent);  // Defines with snooze of 5 minutes
+                30 * 1000, alarmIntent);  // Defines with snooze of 5 minutes
 
         tvAlarmTime.setText("Alarm is set to: " +  calSet.getTime());
         EXACT_ALARM_REQUEST_CODE++;
@@ -146,46 +145,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public static MainActivity getInstance() {
         return instance;
-    }
-
-    /**
-     * This function shows the alert dialog when an exact alarm is received.
-     * It has two options - snooze or confirm the alarm.
-     */
-    public void showAlertDialog() {
-        adb = new AlertDialog.Builder(this);
-        adb.setCancelable(false);
-
-        // Sets the title according to the alarm number
-        if(EXACT_ALARM_REQUEST_CODE == 0) {
-            adb.setTitle("Alarm clock");
-        }
-        else {
-            adb.setTitle("Snooze " + EXACT_ALARM_REQUEST_CODE);
-        }
-
-        adb.setMessage("Do you want confirm the alarm or set 5 minutes snooze?");
-
-        // Confirm the alarm
-        adb.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                EXACT_ALARM_REQUEST_CODE = 0;
-                currentAlarmTime.add(Calendar.DATE, 1);  // Sets for the next day
-                setExactAlarm(currentAlarmTime);
-            }
-        });
-
-        // Mute and snooze
-        adb.setNegativeButton("Mute & Snooze", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                EXACT_ALARM_REQUEST_CODE++;
-            }
-        });
-
-        ad = adb.create();
-        ad.show();
     }
 
     /**
@@ -208,6 +167,26 @@ public class MainActivity extends AppCompatActivity {
 
         alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(alarmIntent);
+    }
+
+    public void increaseExactAlarmCode() {
+        EXACT_ALARM_REQUEST_CODE++;
+    }
+
+    public Calendar getCurrentAlarm() {
+        return currentAlarmTime;
+    }
+
+    public void setCurrentAlarm(Calendar newAlarm) {
+        currentAlarmTime = newAlarm;
+    }
+
+    public int getSnoozeCounter() {
+        return snoozeCounter;
+    }
+
+    public void increaseSnoozeCounter() {
+        snoozeCounter++;
     }
 
     /**
