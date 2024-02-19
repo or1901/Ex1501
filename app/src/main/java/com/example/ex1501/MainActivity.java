@@ -9,6 +9,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.View;
@@ -36,17 +37,36 @@ public class MainActivity extends AppCompatActivity {
     private final static MainActivity instance = new MainActivity();
     private Calendar currentAlarmTime;
     boolean currentAlarmType;
+    SharedPreferences spAlarmFile;
+    SharedPreferences.Editor editor;
+    long currentMillisAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         EXACT_ALARM_REQUEST_CODE = 0;
         snoozeCounter = 0;
+
         tvAlarmTime = (TextView) findViewById(R.id.tvAlarmTime);
-        setHourlyAlarm();
+
+        spAlarmFile = (SharedPreferences) getSharedPreferences("SAVED_ALARMS", MODE_PRIVATE);
+
+        currentMillisAlarm = getSavedAlarm();
+        if(currentMillisAlarm == -1) {
+            setHourlyAlarm();
+        }
+        else {
+            Calendar currTime = Calendar.getInstance();
+            currentAlarmTime = Calendar.getInstance();
+            currentAlarmTime.setTimeInMillis(currentMillisAlarm);
+
+            if (currentAlarmTime.compareTo(currTime) <= 0) {
+                currentAlarmTime.add(Calendar.DATE, 1);
+            }
+            setExactAlarm(currentAlarmTime);
+        }
     }
 
     /**
@@ -136,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         currentAlarmTime = calSet;
 
         currentAlarmType = true;
-
+        saveAlarmInFile(currentAlarmTime);
     }
 
     /**
@@ -187,6 +207,27 @@ public class MainActivity extends AppCompatActivity {
 
     public void increaseSnoozeCounter() {
         snoozeCounter++;
+    }
+
+    public void saveAlarmInFile(Calendar alarm) {
+        editor = spAlarmFile.edit();
+
+        editor.putLong("exactAlarm", alarm.getTimeInMillis());
+        editor.commit();
+    }
+
+    public long getSavedAlarm() {
+        return spAlarmFile.getLong("exactAlarm", -1);
+    }
+
+    public void updateCurrentAlarmWithSnooze() {
+        currentAlarmTime = Calendar.getInstance();
+        currentAlarmTime.setTimeInMillis(getSavedAlarm());
+
+        currentAlarmTime.add(Calendar.MINUTE, 5);
+        saveAlarmInFile(currentAlarmTime);
+
+        tvAlarmTime.setText("Alarm is set to: " +  currentAlarmTime.getTime());
     }
 
     /**

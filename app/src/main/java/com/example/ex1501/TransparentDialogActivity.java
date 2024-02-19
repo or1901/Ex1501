@@ -44,12 +44,17 @@ public class TransparentDialogActivity extends AppCompatActivity {
         adb.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Calendar currentAlarm = mainInstance.getCurrentAlarm();
                 mainInstance.cancelAlarm(true);
-                mainInstance.increaseExactAlarmCode();
+
+                Calendar currentAlarm = Calendar.getInstance();
+                currentAlarm.setTimeInMillis(mainInstance.getSavedAlarm());
                 currentAlarm.add(Calendar.DATE, 1);
+
+                mainInstance.increaseExactAlarmCode();
+
                 mainInstance.setCurrentAlarm(currentAlarm);  // Sets for the next day
                 mainInstance.setExactAlarm(currentAlarm);
+                mainInstance.saveAlarmInFile(currentAlarm);
                 finish();
             }
         });
@@ -59,6 +64,7 @@ public class TransparentDialogActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mainInstance.increaseSnoozeCounter();
+                mainInstance.updateCurrentAlarmWithSnooze();
                 finish();
             }
         });
