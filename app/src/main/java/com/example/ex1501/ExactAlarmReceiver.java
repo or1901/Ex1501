@@ -15,9 +15,14 @@ import android.content.Intent;
 public class ExactAlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent newActivityIntent = new Intent(context, TransparentDialogActivity.class);
-        newActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(newActivityIntent);
+        int snoozeCounter = MainActivity.getSnoozeCounter();
+
+        if(snoozeCounter == 0) {
+            NotificationHelper.showNotificationTwoBtns(context, "Alarm");
+        }
+        else {
+            NotificationHelper.showNotificationTwoBtns(context, "Snooze " + snoozeCounter);
+        }
     }
 
 

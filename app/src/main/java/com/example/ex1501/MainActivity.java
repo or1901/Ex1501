@@ -31,15 +31,14 @@ public class MainActivity extends AppCompatActivity {
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private final int HOURLY_ALARM_REQUEST_CODE = 1;
-    private int EXACT_ALARM_REQUEST_CODE, snoozeCounter;
-    private final Context context = this;
+    private int EXACT_ALARM_REQUEST_CODE;
     private TextView tvAlarmTime;
-    private final static MainActivity instance = new MainActivity();
     private Calendar currentAlarmTime;
     boolean currentAlarmType;
-    SharedPreferences spAlarmFile;
-    SharedPreferences.Editor editor;
+    static SharedPreferences spAlarmFile;
+    static SharedPreferences.Editor editor;
     long currentMillisAlarm;
+    private static MainActivity instance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         EXACT_ALARM_REQUEST_CODE = 0;
-        snoozeCounter = 0;
 
         tvAlarmTime = (TextView) findViewById(R.id.tvAlarmTime);
 
@@ -67,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
             }
             setExactAlarm(currentAlarmTime);
         }
+
+        instance = this;
     }
 
     /**
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setExactAlarm(Calendar calSet) {
         cancelAlarm(currentAlarmType);  // Cancels the existing alarm
-        snoozeCounter = 0;
+        setSnoozeCounter(0);
 
         Intent intent = new Intent(this, ExactAlarmReceiver.class);
 
@@ -157,14 +157,6 @@ public class MainActivity extends AppCompatActivity {
 
         currentAlarmType = true;
         saveAlarmInFile(currentAlarmTime);
-    }
-
-    /**
-     * This function gets the only instance of this activity.
-     * @return The only instance of this activity
-     */
-    public static MainActivity getInstance() {
-        return instance;
     }
 
     /**
@@ -201,12 +193,15 @@ public class MainActivity extends AppCompatActivity {
         currentAlarmTime = newAlarm;
     }
 
-    public int getSnoozeCounter() {
-        return snoozeCounter;
+    public static int getSnoozeCounter() {
+        return spAlarmFile.getInt("snoozeCounter", 0);
     }
 
-    public void increaseSnoozeCounter() {
-        snoozeCounter++;
+    public static void setSnoozeCounter(int counter) {
+        editor = spAlarmFile.edit();
+
+        editor.putInt("snoozeCounter", counter);
+        editor.commit();
     }
 
     public void saveAlarmInFile(Calendar alarm) {
@@ -228,6 +223,10 @@ public class MainActivity extends AppCompatActivity {
         saveAlarmInFile(currentAlarmTime);
 
         tvAlarmTime.setText("Alarm is set to: " +  currentAlarmTime.getTime());
+    }
+
+    public static MainActivity getInstance() {
+        return instance;
     }
 
     /**

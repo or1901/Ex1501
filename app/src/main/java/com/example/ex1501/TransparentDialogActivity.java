@@ -10,66 +10,33 @@ import android.os.Bundle;
 import java.util.Calendar;
 
 public class TransparentDialogActivity extends AppCompatActivity {
-    private AlertDialog.Builder adb;
-    private AlertDialog ad;
     MainActivity mainInstance = MainActivity.getInstance();
     Intent gi;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         gi = getIntent();
-        showAlertDialog();
-    }
 
-    /**
-     * This function shows the alert dialog when an exact alarm is received.
-     * It has two options - snooze or confirm the alarm.
-     */
-    public void showAlertDialog() {
-        adb = new AlertDialog.Builder(this);
-        adb.setCancelable(false);
+        if (gi.getBooleanExtra("confirmAlarm", true)) {
+            mainInstance.cancelAlarm(true);
+            Calendar currentAlarm = Calendar.getInstance();
+            currentAlarm.setTimeInMillis(mainInstance.getSavedAlarm());
+            currentAlarm.add(Calendar.DATE, 1);
 
-        // Sets the title according to the alarm number
-        if(mainInstance.getSnoozeCounter() == 0) {
-            adb.setTitle("Alarm clock");
+            mainInstance.increaseExactAlarmCode();
+
+            mainInstance.setCurrentAlarm(currentAlarm);  // Sets for the next day
+            mainInstance.setExactAlarm(currentAlarm);
+            mainInstance.saveAlarmInFile(currentAlarm);
         }
         else {
-            adb.setTitle("Snooze " + mainInstance.getSnoozeCounter());
+            MainActivity.setSnoozeCounter(MainActivity.getSnoozeCounter() + 1);
+            mainInstance.updateCurrentAlarmWithSnooze();
         }
 
-        adb.setMessage("Do you want confirm the alarm or set 5 minutes snooze?");
+        finish();
 
-        // Confirm the alarm
-        adb.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                mainInstance.cancelAlarm(true);
-
-                Calendar currentAlarm = Calendar.getInstance();
-                currentAlarm.setTimeInMillis(mainInstance.getSavedAlarm());
-                currentAlarm.add(Calendar.DATE, 1);
-
-                mainInstance.increaseExactAlarmCode();
-
-                mainInstance.setCurrentAlarm(currentAlarm);  // Sets for the next day
-                mainInstance.setExactAlarm(currentAlarm);
-                mainInstance.saveAlarmInFile(currentAlarm);
-                finish();
-            }
-        });
-
-        // Mute and snooze
-        adb.setNegativeButton("Mute & Snooze", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                mainInstance.increaseSnoozeCounter();
-                mainInstance.updateCurrentAlarmWithSnooze();
-                finish();
-            }
-        });
-
-        ad = adb.create();
-        ad.show();
     }
 }
