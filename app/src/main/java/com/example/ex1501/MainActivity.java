@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
     boolean currentAlarmType;
     static SharedPreferences spAlarmFile;
     static SharedPreferences.Editor editor;
-    long currentMillisAlarm;
     private static MainActivity instance;
+    private long savedAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +50,15 @@ public class MainActivity extends AppCompatActivity {
 
         setExactAlarmCode(0);
 
-        currentMillisAlarm = getSavedAlarm();
-        if(currentMillisAlarm == -1) {
+        savedAlarm = getSavedAlarm();
+
+        if(savedAlarm == -1) {
             setHourlyAlarm();
         }
         else {
             Calendar currTime = Calendar.getInstance();
             currentAlarmTime = Calendar.getInstance();
-            currentAlarmTime.setTimeInMillis(currentMillisAlarm);
+            currentAlarmTime.setTimeInMillis(savedAlarm);
 
             if (currentAlarmTime.compareTo(currTime) <= 0) {
                 currentAlarmTime.add(Calendar.DATE, 1);
@@ -180,10 +181,6 @@ public class MainActivity extends AppCompatActivity {
 
         alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(alarmIntent);
-    }
-
-    public Calendar getCurrentAlarm() {
-        return currentAlarmTime;
     }
 
     public void setCurrentAlarm(Calendar newAlarm) {
