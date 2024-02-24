@@ -24,12 +24,12 @@ public class NotificationHelper {
         Intent confirmIntent = new Intent(context, TransparentDialogActivity.class);
         confirmIntent.putExtra("confirmAlarm", true);
         PendingIntent confirmPendingIntent = PendingIntent.getActivity(context,
-                0, confirmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                -1, confirmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent snoozeIntent = new Intent(context, TransparentDialogActivity.class);
-        confirmIntent.putExtra("confirmAlarm", false);
+        snoozeIntent.putExtra("confirmAlarm", false);
         PendingIntent snoozePendingIntent = PendingIntent.getActivity(context,
-                0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                -2, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new
                 NotificationCompat.Builder(context, CHANNEL_ID)
