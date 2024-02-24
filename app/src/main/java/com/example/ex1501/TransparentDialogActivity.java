@@ -25,7 +25,7 @@ public class TransparentDialogActivity extends AppCompatActivity {
             currentAlarm.setTimeInMillis(mainInstance.getSavedAlarm());
             currentAlarm.add(Calendar.DATE, 1);
 
-            mainInstance.increaseExactAlarmCode();
+            mainInstance.setExactAlarmCode(mainInstance.getExactAlarmCode() + 1);
 
             mainInstance.setCurrentAlarm(currentAlarm);  // Sets for the next day
             mainInstance.setExactAlarm(currentAlarm);

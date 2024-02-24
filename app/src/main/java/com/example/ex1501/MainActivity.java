@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     private AlarmManager alarmMgr;
     private PendingIntent alarmIntent;
     private final int HOURLY_ALARM_REQUEST_CODE = 1;
-    private int EXACT_ALARM_REQUEST_CODE;
     private TextView tvAlarmTime;
     private Calendar currentAlarmTime;
     boolean currentAlarmType;
@@ -45,11 +44,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EXACT_ALARM_REQUEST_CODE = 0;
-
         tvAlarmTime = (TextView) findViewById(R.id.tvAlarmTime);
 
         spAlarmFile = (SharedPreferences) getSharedPreferences("SAVED_ALARMS", MODE_PRIVATE);
+
+        setExactAlarmCode(0);
 
         currentMillisAlarm = getSavedAlarm();
         if(currentMillisAlarm == -1) {
@@ -139,20 +138,22 @@ public class MainActivity extends AppCompatActivity {
      * @param calSet The calendar object to set the alarm to its time
      */
     public void setExactAlarm(Calendar calSet) {
+        int alarmCode = getExactAlarmCode();
+
         cancelAlarm(currentAlarmType);  // Cancels the existing alarm
         setSnoozeCounter(0);
 
         Intent intent = new Intent(this, ExactAlarmReceiver.class);
 
         alarmIntent = PendingIntent.getBroadcast(this,
-                EXACT_ALARM_REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
+                alarmCode, intent, PendingIntent.FLAG_IMMUTABLE);
         alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP,
                 calSet.getTimeInMillis(),
                 30 * 1000, alarmIntent);  // Defines with snooze of 5 minutes
 
         tvAlarmTime.setText("Alarm is set to: " +  calSet.getTime());
-        EXACT_ALARM_REQUEST_CODE++;
+        setExactAlarmCode(alarmCode + 1);
         currentAlarmTime = calSet;
 
         currentAlarmType = true;
@@ -174,15 +175,11 @@ public class MainActivity extends AppCompatActivity {
         else {
             intent = new Intent(this, ExactAlarmReceiver.class);
             alarmIntent = PendingIntent.getBroadcast(this,
-                    EXACT_ALARM_REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
+                    getExactAlarmCode(), intent, PendingIntent.FLAG_IMMUTABLE);
         }
 
         alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(alarmIntent);
-    }
-
-    public void increaseExactAlarmCode() {
-        EXACT_ALARM_REQUEST_CODE++;
     }
 
     public Calendar getCurrentAlarm() {
@@ -223,6 +220,16 @@ public class MainActivity extends AppCompatActivity {
         saveAlarmInFile(currentAlarmTime);
 
         tvAlarmTime.setText("Alarm is set to: " +  currentAlarmTime.getTime());
+    }
+
+    public void setExactAlarmCode(int code) {
+        editor = spAlarmFile.edit();
+
+        editor.putInt("currentAlarmCode", code);
+        editor.commit();
+    }
+    public int getExactAlarmCode() {
+        return spAlarmFile.getInt("currentAlarmCode", 0);
     }
 
     public static MainActivity getInstance() {
