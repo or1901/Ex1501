@@ -9,6 +9,12 @@ import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
 
+/**
+ * Helper class for creating notifications.
+ * @author Ori Roitzaid <or1901 @ bs.amalnet.k12.il>
+ * @version	1
+ * @since 24/2/2024
+ */
 public class NotificationHelper {
     private static final String CHANNEL_ID = "Alarm_Channel_ID";
     private static final String CHANNEL_NAME = "Alarm_Channel";

@@ -1,6 +1,5 @@
 package com.example.ex1501;
 
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +14,7 @@ import android.content.Intent;
 public class ExactAlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        MainActivity.initSpObj(context);
         int snoozeCounter = MainActivity.getSnoozeCounter();
 
         if(snoozeCounter == 0) {
@@ -24,6 +24,4 @@ public class ExactAlarmReceiver extends BroadcastReceiver {
             NotificationHelper.showNotificationTwoBtns(context, "Snooze " + snoozeCounter);
         }
     }
-
-
 }

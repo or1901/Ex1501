@@ -10,6 +10,13 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
+/**
+ * Broadcast receiver which gets notified when the phone is rebooted. It sets the alarm saved in the
+ * shared preferences file.
+ * @author Ori Roitzaid <or1901 @ bs.amalnet.k12.il>
+ * @version	1
+ * @since 25/2/2024
+ */
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
